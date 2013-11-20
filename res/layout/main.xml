@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="fill_parent"
+              android:layout_height="fill_parent"
+	>
+
+	<Button
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:text="Measure warmup"
+		android:id="@+id/btnMeasure"
+		android:layout_gravity="left|center_vertical"/>
+
+	<Button
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:text="Record (no echo)"
+		android:id="@+id/btnRecord"
+		android:layout_gravity="left|center_vertical"/>
+
+	<Button
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:text="Record (echo from file)"
+		android:id="@+id/btnRecord2"
+		android:layout_gravity="left|center_vertical"/>
+
+	<Button
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:text="Record (echo from speaker)"
+		android:id="@+id/btnRecord3"
+		android:layout_gravity="left|center_vertical"/>
+
+	<Button
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:text="Play Mic"
+		android:id="@+id/btnPlayMic"
+		android:layout_gravity="left|center_vertical"/>
+
+	<Button
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:text="Play Ref"
+		android:id="@+id/btnPlayRef"
+		android:layout_gravity="left|center_vertical"/>
+
+	<Button
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:text="Play Output"
+		android:id="@+id/btnPlayOut"
+		android:layout_gravity="left|center_vertical"/>
+
+	<Button
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:text="Play Speaker(Echo)"
+		android:id="@+id/btnPlaySpeaker"
+		android:layout_gravity="left|center_vertical"/>
+</LinearLayout>
+
