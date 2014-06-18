@@ -1,0 +1,11 @@
+测试参数：
+  远端信号为用 AudioTrack 播放的本地音频文件；
+  近端信号为匀速数数；
+  传递给 WebRTC Aecm.process() 的 delay(aka msInSndCardBuf) 参数硬编码为 380ms；
+  设备为华为B199；
+
+结果分析：
+  1. 对比 far 和 near，可知播放与录音之间的延迟为400ms；
+  2. Aecm 的确把远端信号（回声）消除掉了，但是同一区间的近端信号也被消除掉了；
+  
+

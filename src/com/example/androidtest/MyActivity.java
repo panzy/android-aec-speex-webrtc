@@ -99,7 +99,7 @@ public class MyActivity extends Activity implements View.OnClickListener {
     }
 
     private void play(String filename) {
-        AudioTrack player = new AudioTrack(AudioManager.STREAM_MUSIC,
+        AudioTrack player = new AudioTrack(AudioManager.STREAM_VOICE_CALL,
                 sampleRate,
                 AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT,
                 managerBufferSize, AudioTrack.MODE_STREAM);
@@ -262,7 +262,8 @@ public class MyActivity extends Activity implements View.OnClickListener {
                 t_process = System.currentTimeMillis();
                 long delay = ((t_render - t_analyze) + (t_process - t_capture));
                 Log.d(TAG, "delay=" + delay);
-                aec.process(micShorts, null, outShorts, (short)160, (short)300);
+                delay = 360; // hardcode
+                aec.process(micShorts, null, outShorts, (short)160, (short)delay);
                 outBytes = new byte[shortsRead * 2];
                 ByteBuffer.wrap(outBytes).order(ByteOrder.LITTLE_ENDIAN).asShortBuffer().put(outShorts);
             } else {
