@@ -81,6 +81,12 @@ public class MyActivity extends Activity implements View.OnClickListener {
     }
 
     @Override
+    public void onStart() {
+        super.onStart();
+        loadSampleSpeakerFromAsset();
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
         echoCanceller.open(sampleRate, frameSize, filterLength);
@@ -496,6 +502,26 @@ public class MyActivity extends Activity implements View.OnClickListener {
                 .show();
     }
 
+    private void loadSampleSpeakerFromAsset() {
+        try
+        {
+            InputStream fis = getAssets().open("speaker.raw");
+            OutputStream fos = new FileOutputStream(speaker_filename);
+            if (fis != null) {
+                byte[] buf = new byte[1024];
+                int n = 0;
+                while ((n = fis.read(buf)) > 0)
+                {
+                    fos.write(buf, 0, n);
+                }
+            }
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+    }
+
     private void onPlay(final Button btn, final String filename) {
         if (isPlaying) {
             isPlaying = false;
@@ -519,4 +545,6 @@ public class MyActivity extends Activity implements View.OnClickListener {
             }
         }).start();
     }
+
+
 }
