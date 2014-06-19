@@ -11,7 +11,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 import org.webrtc.Aecm;
-import speex.EchoCanceller;
+import speex_aec.SpeexAec;
 
 import java.io.*;
 import java.nio.ByteBuffer;
@@ -30,7 +30,7 @@ public class MyActivity extends Activity implements View.OnClickListener {
     private Button btnRecord, btnRecord2, btnRecord3,
             btnPlayMic, btnPlaySpeaker, btnPlayRef, btnPlayOut,
             btnMeasure;
-    private EchoCanceller echoCanceller = new EchoCanceller();
+    private SpeexAec echoCanceller = new SpeexAec();
 
     int sampleRate = 8000;
     int managerBufferSize = 2000;
@@ -49,10 +49,6 @@ public class MyActivity extends Activity implements View.OnClickListener {
     final static int frameRate = 1000 / frameMs;
     int frameSize = sampleRate * 20 / 1000;
     int filterLength = frameSize * 16;
-
-    static {
-        System.loadLibrary("speex");
-    }
 
     /**
      * Called when the activity is first created.
@@ -99,7 +95,7 @@ public class MyActivity extends Activity implements View.OnClickListener {
     }
 
     private void play(String filename) {
-        AudioTrack player = new AudioTrack(AudioManager.STREAM_VOICE_CALL,
+        AudioTrack player = new AudioTrack(AudioManager.STREAM_MUSIC,
                 sampleRate,
                 AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT,
                 managerBufferSize, AudioTrack.MODE_STREAM);
@@ -127,7 +123,19 @@ public class MyActivity extends Activity implements View.OnClickListener {
         Air
     }
 
-    private void record(EchoSource air) {
+    enum AecModule {
+        None,
+        Speex,
+        WebRtc
+    }
+
+    private void record(EchoSource air)
+    {
+        final AecModule whichAec = AecModule.Speex; // which AEC module to use? 0: speex, 1: webrtc
+
+        // 设备固有的回声延迟：远端信号被播放与被录音这两个事件的时间间隔（millis）。
+        final int originDelay = air == EchoSource.Air && whichAec == AecModule.Speex ? 360 : 0;
+
         managerBufferSize = AudioRecord.getMinBufferSize(sampleRate, AudioFormat.CHANNEL_IN_MONO,
                 AudioFormat.ENCODING_PCM_16BIT);
 
@@ -174,7 +182,6 @@ public class MyActivity extends Activity implements View.OnClickListener {
         int recorderTimes = 1;
         short[] refShortsBuf = new short[frameSize * (frameRate + 1)]; // ring buffer
         int refShortsWPos = 0; // write position of ring buffer
-        int originDelay = air == EchoSource.Air ? 0 : 0; // original echo delay, in ms
         int refShortsRPos = -(originDelay / frameMs * frameSize); // read position of ring buffer
 
         int bytesToRead = frameSize * 2;
@@ -254,16 +261,23 @@ public class MyActivity extends Activity implements View.OnClickListener {
             refShortsRPos = (refShortsRPos + frameSize) % refShortsBuf.length;
 
             // do echo cancellation
-            aec.bufferFarend(refShorts, (short)160);
             byte[] outBytes = null;
             if (refShorts != null) {
-                //short[] outShorts = echoCanceller.process(micShorts, refShorts);
-                short[] outShorts = new short[shortsRead];
-                t_process = System.currentTimeMillis();
-                long delay = ((t_render - t_analyze) + (t_process - t_capture));
-                Log.d(TAG, "delay=" + delay);
-                delay = 360; // hardcode
-                aec.process(micShorts, null, outShorts, (short)160, (short)delay);
+                short[] outShorts = null;
+                if (whichAec == AecModule.Speex && refShorts != null) {
+                    outShorts = new short[micShorts.length];
+                    echoCanceller.process(micShorts, refShorts, outShorts);
+                } else if (whichAec == AecModule.WebRtc && refShorts != null) {
+                    aec.bufferFarend(refShorts, (short)160);
+                    outShorts = new short[shortsRead];
+                    t_process = System.currentTimeMillis();
+                    long delay = ((t_render - t_analyze) + (t_process - t_capture));
+                    Log.d(TAG, "delay=" + delay);
+                    delay = 360; // hardcode
+                    aec.process(micShorts, null, outShorts, (short) 160, (short) delay);
+                } else {
+                    outShorts = micShorts;
+                }
                 outBytes = new byte[shortsRead * 2];
                 ByteBuffer.wrap(outBytes).order(ByteOrder.LITTLE_ENDIAN).asShortBuffer().put(outShorts);
             } else {
